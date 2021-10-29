@@ -1,7 +1,10 @@
-require('dotenv').config()
 
+require('dotenv').config()
+const https = require('https')
 const { checkPrimeSync } = require('crypto');
-const { Client, Intents, Message } = require('discord.js');
+const fetch = require('cross-fetch');
+const Canvas = require('canvas');
+const { Client, Intents, Message, MessageAttachment, MessageEmbed } = require('discord.js');
 
 
 const adjectives = [
@@ -34,7 +37,7 @@ const nouns = [
     "idiot",
     "asshole",
     "shit",
-    "prick",
+  
     "prat",
     "fuckwit",
     "imbecil",
@@ -47,18 +50,18 @@ const nouns = [
     "halfwit",
     "simpleton",
     "jerk",
-    "dick",
-    "dickhead",
+
+  
     "asshat",
-    "dickweed",
+    
     "shitface",
     "bastard",
     "bellend",
     "bitch",
     "coward",
-    "dickbag",
+
     "gimp",
-    "pussy",
+
     "dipshit"
 ]
 
@@ -70,8 +73,50 @@ const fletcher_insults = [
 
 ]
 
+async function fetchRedditData() {
+    const res = await fetch("it.com/r/cursedimages/random.json?limit=100");
+    const data = await res.json();
+  
+    return data[0].data.children[0].data;
+  }
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+ async function getTitleAndImg(msg) {
+  fetch("https://reddit.com/r/cursedimages/.json").then(res=>res.json()).then(data=>{
+    let number  = Math.floor(Math.random() *27 +1)
+    
+    if(number===-0 || number===1){
+        number = 19
+    }
+ 
+    else{
+      
+
+     
+        console.log(data.data.children[number].data.subreddit_subscribers)
+        const exampleEmbed = new MessageEmbed()
+        .setTitle(data.data.children[number].data.title)
+        .setURL("https://reddit.com"+data.data.children[number].data.permalink)
+      
+        .setDescription(data.data.children[number].data.subreddit_name_prefixed)
+      
+
+        .setImage(data.data.children[number].data.url_overridden_by_dest)
+        .setTimestamp()
+        
+
+        msg.reply({ embeds: [exampleEmbed] });
+    }
+  })
+
+
+
+  }
+
+
+
+
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
 
 
 client.on('ready', ()=>{
@@ -88,6 +133,18 @@ client.on('message',async (msg)=>{
         }
         
 
+    }
+
+    if(msg.mentions.has(client.user)){
+        let number = Math.random()<0.5?0:1
+
+        if(number===0){
+            msg.reply("yer a f***ing retard ain't ye")
+        }
+        else{
+            msg.react("🖕")
+        }
+        
     }
 
     else if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
@@ -125,6 +182,11 @@ client.on('message',async (msg)=>{
 
     else if(msg.content.toLowerCase() === "ans"){
         msg.channel.send("ANSWEEEEERRR!")
+    }
+
+    else if(msg.content.toLowerCase() === "cursed"){
+        getTitleAndImg(msg)
+       
     }
 })
 
