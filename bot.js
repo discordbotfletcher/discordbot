@@ -4,7 +4,7 @@ const https = require('https')
 const { checkPrimeSync } = require('crypto');
 const fetch = require('cross-fetch');
 const Canvas = require('canvas');
-const { Client, Intents, Message, MessageAttachment, MessageEmbed } = require('discord.js');
+const { Client, Intents, Message, MessageAttachment, MessageEmbed, MessageSelectMenu } = require('discord.js');
 
 
 const adjectives = [
@@ -62,7 +62,8 @@ const nouns = [
 
     "gimp",
 
-    "dipshit"
+    "dipshit",
+    "mfer"
 ]
 
 
@@ -81,37 +82,55 @@ async function fetchRedditData() {
   }
 
 
- async function getTitleAndImg(msg) {
-  fetch("https://reddit.com/r/cursedimages/.json").then(res=>res.json()).then(data=>{
-    let number  = Math.floor(Math.random() *27 +1)
+ async function getTitleAndImg(msg, subreddit) {
+
+  fetch("https://reddit.com/r/"+subreddit.toLowerCase()+"/.json?limit=60").then(res=>res.json()).then(data=>{
+      
+  
+    if(data.data.children.length>0){
     
-    if(number===-0 || number===1){
-        number = 19
-    }
- 
+        let number  = Math.floor(Math.random() *data.data.children.length +1)
+    
+            if(number===-0 || number===1){
+                number = 19
+            }
+    
+            else{
+            
+
+                const exampleEmbed = new MessageEmbed()
+                .setTitle(data.data.children[number].data.title)
+                .setURL("https://reddit.com"+data.data.children[number].data.permalink)
+            
+                .setDescription(data.data.children[number].data.subreddit_name_prefixed)
+            
+
+                .setImage(data.data.children[number].data.url_overridden_by_dest)
+                .setTimestamp()
+                
+
+                msg.reply({ embeds: [exampleEmbed] });
+            }
+            }
+
     else{
-      
-
-     
-        console.log(data.data.children[number].data.subreddit_subscribers)
-        const exampleEmbed = new MessageEmbed()
-        .setTitle(data.data.children[number].data.title)
-        .setURL("https://reddit.com"+data.data.children[number].data.permalink)
-      
-        .setDescription(data.data.children[number].data.subreddit_name_prefixed)
-      
-
-        .setImage(data.data.children[number].data.url_overridden_by_dest)
-        .setTimestamp()
-        
-
-        msg.reply({ embeds: [exampleEmbed] });
+        msg.channel.send("There's no f***ing subreddit like that, try not to act retarded next time.")
     }
+    
   })
 
 
 
   }
+
+  
+//    async function playMusic(message){
+    
+//     let track = await client.player.play(message.member.voice.channel, "Hello", message.member.user.tag)
+//     message.channel.send(`Currently playing ${track.name}! Requested by ${track.requestedBy}`)
+
+//    }
+
 
 
 
@@ -124,18 +143,36 @@ client.on('ready', ()=>{
 })
 client.on('message',async (msg)=>{
     
-    if(msg.content.toLowerCase() === 'fletcher'){
-        if(msg.content === "FLETCHER"){
-            msg.reply(`YE WHAT DO YOU WANT`)
-        }
-        else{
-            msg.reply(`ye, what do you want`)
-        }
-        
+    //WITH PREFIX
+    if(msg.content.toLowerCase().startsWith("flet") || !msg.author.bot){
 
+        let command  = msg.content.toLowerCase().split(" ").pop()
+
+   
+       
+        
+        if(command.toLowerCase().startsWith("reddit")){
+            console.log("split array")
+            let subreddit = command.trim().split(",").pop().trim()
+            
+         
+            if(subreddit.length>=1){
+               getTitleAndImg(msg, subreddit)
+            }
+
+            else{
+                msg.channel.send("*In a soft, menacing tone:* Do you thinlk, not specifying the subreddit is a great idea?")
+            }
+           
+           
+        }
+
+        
     }
 
-    if(msg.mentions.has(client.user)){
+    //WITHOUT PREFIX
+
+    else if(msg.mentions.has(client.user)){
         let number = Math.random()<0.5?0:1
 
         if(number===0){
@@ -145,9 +182,10 @@ client.on('message',async (msg)=>{
             msg.react("🖕")
         }
         
+
     }
 
-    else if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
+    else  if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
 
         let option  = Math.random()<0.5?0:1
 
@@ -175,8 +213,9 @@ client.on('message',async (msg)=>{
         }
     }
 
+
     else if(msg.content.toLowerCase()==="twtfdyss"){
-  
+      
         msg.channel.send("THEN WHY THE F*** DIDN'T YE SAY SO!")
     }
 
@@ -184,10 +223,19 @@ client.on('message',async (msg)=>{
         msg.channel.send("ANSWEEEEERRR!")
     }
 
-    else if(msg.content.toLowerCase() === "cursed"){
-        getTitleAndImg(msg)
-       
+
+    else{
+        return;
     }
+
+
+   
+
+
+
+    
 })
 
 client.login(process.env.BOT_TOKEN)
+
+
