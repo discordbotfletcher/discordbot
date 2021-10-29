@@ -87,7 +87,7 @@ async function fetchRedditData() {
   fetch("https://reddit.com/r/"+subreddit.toLowerCase()+"/.json?limit=60").then(res=>res.json()).then(data=>{
       
   
-    if(data.data.children.length>0){
+    if(data){
     
         let number  = Math.floor(Math.random() *data.data.children.length +1)
     
@@ -144,7 +144,7 @@ client.on('ready', ()=>{
 client.on('message',async (msg)=>{
     
     //WITH PREFIX
-    if(msg.content.toLowerCase().startsWith("flet") || !msg.author.bot){
+    if(msg.content.toLowerCase().startsWith("flet")){
 
         let command  = msg.content.toLowerCase().split(" ").pop()
 
@@ -185,8 +185,8 @@ client.on('message',async (msg)=>{
 
     }
 
-    else  if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
-
+    else if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
+        console.log("Asdafds")
         let option  = Math.random()<0.5?0:1
 
 
