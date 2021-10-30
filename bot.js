@@ -116,13 +116,13 @@ async function fetchRedditData() {
             
 
                 const exampleEmbed = new MessageEmbed()
-                .setTitle(data.data.children[number].data.title)
+                .setTitle(data?.data?.children[number]?.data.title)
                 .setURL("https://reddit.com"+data.data.children[number].data.permalink)
             
-                .setDescription(data.data.children[number].data.subreddit_name_prefixed)
+                .setDescription(data?.data?.children[number]?.data.subreddit_name_prefixed)
             
 
-                .setImage(data.data.children[number].data.url_overridden_by_dest)
+                .setImage(data.data.children[number]?.data.url_overridden_by_dest)
                 .setTimestamp()
                 
 
