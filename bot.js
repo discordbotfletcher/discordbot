@@ -412,13 +412,13 @@ client.on('message',async (msg)=>{
         }
        }, 2000)
 
-        msg.delete(1)
+     
     }
 
 
     else if(msg.content.toLowerCase()==="twtfdyss"){
         setTimeout(()=>{ msg.channel.send("THEN WHY THE F*** DIDN'T YE SAY SO!")}, 2000)
-        msg.delete(1)
+     
        
     }
 
