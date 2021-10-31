@@ -369,11 +369,11 @@ client.on('message',async (msg)=>{
 
     //WITHOUT PREFIX
 
-    else if(msg.mentions.has(client.user)){
+    else if(msg.content === "<@903238930089009212>" ){
         let number = Math.random()<0.5?0:1
 
         if(number===0){
-            msg.reply("yer a f***ing retard ain't ye")
+            msg.reply("yer a f***ing retard pinging me ain't ye")
         }
         else{
             msg.react("🖕")
@@ -427,8 +427,8 @@ client.on('message',async (msg)=>{
     }
 
 
-    else if(msg.content.toLowerCase().trim() ==="fletcher"){
-        if(msg.content.toUpperCase().trim()==="FLETCHER"){
+    else if(msg.content.toLowerCase() === "fletcher"){
+        if(msg.content.toUpperCase()==="FLETCHER"){
             msg.reply("YE WHAT THE F*** DO YOU WANT?!")
         }
 
@@ -444,11 +444,6 @@ client.on('message',async (msg)=>{
     }
 
 
-   
-
-
-
-    
 })
 
 client.login(process.env.BOT_TOKEN)
