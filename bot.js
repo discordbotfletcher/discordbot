@@ -302,17 +302,25 @@ client.on('message',async (msg)=>{
   
 
         else if(command.toLowerCase().startsWith("volume")){
-
+            
             let amount = parseInt(command.trim().split(",").pop().trim())
 
             let queue = distube.getQueue(msg.guild.id);
-            if(queue.volume> amount){
-                msg.channel.send(`Volume set to ${amount}. it's a good thing you decided to lower it, this ain't my f***ing tempo, its hurting my ears.`);
+            if(amount>=0 && amount<=100){
+                if(queue.volume> amount){
+                    msg.channel.send(`Volume set to ${amount} %. it's a good thing you decided to lower it, this ain't my f***ing tempo, its hurting my ears.`);
+                }
+                else{
+                    msg.channel.send(`Volume set to ${amount} %. I would recommend lowering it, they aren't playing on my f***ing tempo.`)
+                }
+                queue.setVolume(amount);
             }
+
             else{
-                msg.channel.send(`Volume set to ${amount}. I would recommend lowering it, they aren't playing on my f***ing tempo.`)
+                msg.reply("Ever heard of percentage? Or math? Volume must be within 1 and 100")
             }
-            queue.setVolume(amount);
+           
+         
            
             
         }
@@ -437,7 +445,9 @@ client.on('message',async (msg)=>{
         }
     }
 
-    
+    else if(msg.content.toLowerCase()==="sup dawg"){
+       process.exit(1)
+    }
 
     else{
         return;
