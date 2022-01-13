@@ -1,17 +1,28 @@
 
 require('dotenv').config()
 const https = require('https')
+
 const { checkPrimeSync } = require('crypto');
 const fetch = require('cross-fetch');
 const Canvas = require('canvas');
 const { Client, Intents, Message, MessageAttachment, VoiceChannel,MessageEmbed, MessageSelectMenu } = require('discord.js');
 const voice = require('@discordjs/voice');
 const Distube = require("distube").default;
+var admin = require("firebase-admin");
+
+var firebase= require("./firebase.json");
+admin.initializeApp({
+credential: admin.credential.cert(firebase)
+});
+
+const db = admin.firestore()
 
 
 const adjectives = [
     "stupid",
     "unintelligent",
+    "dense",
+    "fatherless",
     "brainless",
     "witless",
     "ignorant",
@@ -24,64 +35,55 @@ const adjectives = [
     "relentable",
     "unlikable",
     "unlovable",
+    "limp-dick",
+    "hymie",
     "repulsive",
     "arrogant",
     "pathetic",
     "brazen",
     "infantile",
-    "decrepit",
     "grotesque",
-    "fricking",
-    "worthless"
+    "fucking",
+    "worthless",
+    "fat",
+    "absolute",
+    "motherfucking"
 ]
-
-
 
 const nouns = [
     "idiot",
     "asshole",
     "shit",
-  
-    "prat",
+    "fucker",
     "fuckwit",
-    "imbecil",
     "douchebag",
-    "fool",
     "dunce",
     "dolt",
     "moron",
-    "cretin",
     "halfwit",
     "simpleton",
-    "jerk",
-
-  
     "asshat",
-    
     "shitface",
     "bastard",
-    "bellend",
     "bitch",
-    "coward",
-
-    "gimp",
-
     "dipshit",
-    "mfer"
+    "faggot",
+    "niggerfaggot",
+    "dumbass",
+    "motherfucker"
 ]
 
 
 const fletcher_insults = [
     "jesus fucking christ - I didn't know they allowed retards into Discord!",
     "is nothing but a useless, worthless, faggot-lipped piece of shit whose mommy left daddy when she realized he wasn't exactly Eugene O Neill, who is now acting like a retard all over the channels!",
-   
 
 ]
 
 
 const vc_links = [
 
-    {name:"bandpractice", link:"https://www.youtube.com/watch?v=xDAsABdkWSc&t=152s"},
+    {name:"band", link:"https://www.youtube.com/watch?v=xDAsABdkWSc&t=152s"},
     {name: "Caravan", link:"https://www.youtube.com/watch?v=38CRu1rCaKg"},
     {name: "Whiplash", link:"https://www.youtube.com/watch?v=HJrTYOyXHA0"},
     {name:"Overture", link:"https://www.youtube.com/watch?v=1Wr0yz4FLAg"},
@@ -91,55 +93,105 @@ const vc_links = [
 
 const song_counter = 0;
 
-async function fetchRedditData() {
-    const res = await fetch("it.com/r/cursedimages/random.json?limit=100");
-    const data = await res.json();
-  
-    return data[0].data.children[0].data;
-  }
 
-
- async function getTitleAndImg(msg, subreddit) {
-
-  fetch("https://reddit.com/r/"+subreddit.toLowerCase()+"/.json?limit=60").then(res=>res.json()).then(data=>{
+ async function getTitleAndImg(msg, subreddit, is_NSFW) {
+    
+    if(is_NSFW)
+    {
+        fetch("https://reddit.com/r/"+subreddit.toLowerCase()+"/.json?limit=60").then(res=>res.json()).then(data=>{
       
   
-    if(data){
-    
-        let number  = Math.floor(Math.random() *data.data.children.length +1)
-    
-            if(number===-0 || number===1){
-                number = 19
-            }
-    
-            else{
-            
+            if(data?.data?.children.length>1){
+        
+                let number  = Math.floor(Math.random() *data?.data?.children?.length +1)
+        
+                if(data?.data?.children[number].data?.over_18 === true){
+                    
+                    if(msg.channel.nsfw){
 
-                const exampleEmbed = new MessageEmbed()
-                .setTitle(data?.data?.children[number]?.data.title)
-                .setURL("https://reddit.com"+data.data.children[number].data.permalink)
-            
-                .setDescription(data?.data?.children[number]?.data.subreddit_name_prefixed)
-            
-
-                .setImage(data.data.children[number]?.data.url_overridden_by_dest)
-                .setTimestamp()
+                        if(number===-0 || number===1){
+                            number = 6
+                        }
                 
+                        else{
+                    
+                            const exampleEmbed = new MessageEmbed()
+                            .setTitle(data?.data.children[number].data?.title)
+                            .setURL("https://reddit.com"+data?.data?.children[number].data?.permalink)
+                        
+                            .setDescription(data?.data?.children[number]?.data?.subreddit_name_prefixed)
+                        
+            
+                            .setImage(data?.data?.children[number]?.data?.url_overridden_by_dest)
+                            .setTimestamp()
+                            
+            
+                            msg.reply({ embeds: [exampleEmbed] });
+                        }
+                    }
 
-                msg.reply({ embeds: [exampleEmbed] });
+                    else{
+                        msg.reply("You can only view NSFW in an NSFW channel you dumb fuck")
+                    }
+                    
+                }
+        
+                else{
+                    msg.reply("That's not NSFW you retard. Enter an actual one next time.")
+                }
+                    }
+        
+            else{
+                msg.channel.send("There was an error fetching data. Try again.")
             }
-            }
+            
+          })
+    }
 
     else{
-        msg.channel.send("There's no f***ing subreddit like that, try not to act retarded next time.")
+
+        fetch("https://reddit.com/r/"+subreddit.toLowerCase()+"/.json?limit=60").then(res=>res.json()).then(data=>{
+      
+  
+            if(data?.data?.children.length>1){
+        
+                let number  = Math.floor(Math.random() *data?.data?.children?.length +1)
+        
+                if(data?.data?.children[number].data?.over_18 === false){
+
+                        if(number===-0 || number===1){
+                            number = 6
+                        }
+                
+                        else{
+                    
+                            const exampleEmbed = new MessageEmbed()
+                            .setTitle(data?.data.children[number].data?.title)
+                            .setURL("https://reddit.com"+data?.data?.children[number].data?.permalink)
+                        
+                            .setDescription(data?.data?.children[number]?.data?.subreddit_name_prefixed)
+                        
+            
+                            .setImage(data?.data?.children[number]?.data?.url_overridden_by_dest)
+                            .setTimestamp()
+
+                            msg.reply({ embeds: [exampleEmbed] });
+                        }
+                }
+        
+                else{
+                    msg.reply("You cannot view NSFW with this command.")
+                }
+                    }
+        
+            else{
+                msg.channel.send("There was an error fetching data from that source. Try again.")
+            }
+            
+          })
     }
-    
-  })
-
-
 
   }
-
 
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
@@ -153,6 +205,7 @@ const distube = new Distube(client, {
 client.on('ready', ()=>{
     console.log(`Logged in as ${client.user.tag}`)
 })
+
 
 
 const status = (queue) =>
@@ -200,57 +253,43 @@ distube.on("playSong", (queue, song) => {
 
 
 client.on('message',async (msg)=>{
+
     
-    //WITH PREFIX
-    if(msg.content.toLowerCase().startsWith("flet")){
+    if(msg.content.toLowerCase().startsWith(".f")){
 
         let command  = msg.content.toLowerCase().split(" ").pop()
 
-   
-       
-        
         if(command.toLowerCase().startsWith("reddit")){
-            console.log("split array")
             let subreddit = command.trim().split(",").pop().trim()
             
          
             if(subreddit.length>=1){
-               getTitleAndImg(msg, subreddit)
+               getTitleAndImg(msg, subreddit, false)
             }
 
             else{
-                msg.channel.send("*In a soft, menacing tone:* Do you thinlk, not specifying the subreddit is a great idea?")
+                msg.channel.send("*In a soft, menacing tone:* Do you thinlk, not specifying the name is a great idea?")
             }
            
            
         }
 
-        else if(command.toLowerCase() === "bandpractice"){
-          
-             
-            let channel = msg.member.voice.channel;
-            let queue = distube.getQueue(msg.guildId);
-            if (!channel) {
-            return msg.reply({
-                embeds: [
-                new MessageEmbed()
-                    .setColor("BLURPLE")
-                    .setDescription(`Do you think, asking me to play songs without joining a voice channel is a good idea? Join and then ask me, don't waste my time.`)
-                    .setFooter(
-                    `Fletcher Bot`,
-                    msg.author.displayAvatarURL({ dynamic: true })
-                    ),
-                ],
-            });
+        else if(command.toLowerCase().startsWith("nsfw")){
+
+            let subreddit = command.trim().split(",").pop().trim()
+            
+            if(subreddit.length>=1){
+               getTitleAndImg(msg, subreddit, true)
             }
 
-
-   
-                 distube.play(msg, vc_links[0].link);
+            else{
+                msg.channel.send("*In a soft, menacing tone:* Do you think, not specifying the name is a great idea?")
             }
+           
+           
+        }
         
-        
-        else if(command.toLowerCase().startsWith("whip")){
+        else if(command.toLowerCase().startsWith("practice")){
 
             let channel = msg.member.voice.channel;
             let queue = distube.getQueue(msg.guildId);
@@ -274,11 +313,9 @@ client.on('message',async (msg)=>{
             else{
 
                 let song = command.trim().split(",").pop().trim()
-            
-            
+                        
                 let counter = 0;
             for(let i=0; i<=vc_links.length;i++){
-                console.log(i)
                 if(vc_links[i].name.toLowerCase() === song.toLowerCase()){
                     
                     distube.play(msg, vc_links[i].link)
@@ -287,9 +324,8 @@ client.on('message',async (msg)=>{
 
                 else{
                     counter+=1
-                    console.log(counter, "counter")
                     if(counter===vc_links.length){
-                        msg.reply("That ain't a valid song name ye dingus")
+                        msg.reply("That ain't a valid song name you dingus")
                         break
                     }
                 }
@@ -308,43 +344,48 @@ client.on('message',async (msg)=>{
             let queue = distube.getQueue(msg.guild.id);
             if(amount>=0 && amount<=100){
                 if(queue.volume> amount){
-                    msg.channel.send(`Volume set to ${amount} %. it's a good thing you decided to lower it, this ain't my f***ing tempo, its hurting my ears.`);
+                    msg.channel.send(`Volume set to ${amount}%. it's a good thing you decided to lower it, this ain't my f***ing tempo, its hurting my ears.`);
                 }
                 else{
-                    msg.channel.send(`Volume set to ${amount} %. I would recommend lowering it, they aren't playing on my f***ing tempo.`)
+                    msg.channel.send(`Volume set to ${amount}%. I would recommend lowering it, they aren't playing on my f***ing tempo.`)
                 }
                 queue.setVolume(amount);
             }
 
             else{
-                msg.reply("Ever heard of percentage? Or math? Volume must be within 1 and 100")
+                msg.reply("Volume must be within 1 and 100")
             }
-           
-         
-           
             
         }
 
         else if(command.toLowerCase() === "skip"){
             
             let queue = distube.getQueue(msg.guild.id);
-            console.log(queue, "skip")
-            console.log(queue?.next)
          
         if (!msg.guild.me.voice.channel || !queue) {
            msg.reply(`Nothing to skip.`);
-           console.log(msg.guild.me.voice.channel)
           
         }
       
-
-        
         else{
             msg.channel.send(`Skipping ${queue?.songs[song_counter].name}`)
             queue?.skip()
         }
 
     
+        }
+
+     
+
+        else if(command.toLowerCase() === "stop"){
+
+            let queue = distube.getQueue(msg.guild.id)
+            if (!msg.guild.me.voice.channel || !queue) {
+                msg.reply(`Nothing to stop.`);
+             }
+           
+            distube.stop(msg)
+            msg.channel.send(`Stopped playing ${queue?.songs[song_counter].name}`)
         }
 
         else if(command.toLowerCase().trim()==="help"){
@@ -356,19 +397,13 @@ client.on('message',async (msg)=>{
             .setDescription('Fun bot that plays Whiplash songs, greets you (rudely), displays subreddit contents and reacts angrily if you mention it. (More coming soon!)')
 
             .addFields(
-                {name:"Prefix", value:"**flet**"},
-                { name: 'Greeting Cmds', value: '**fletcher / FLETCHER** - (Greets you angrily) \n' },
-                {name: "Insult Cmds", value:"**sup terence fletcher / sup fletcher** - (Insults you) \n **@Fletcher Bot** - (Reacts with middle finger emoji or insults you) \n "},
-                {name:"Reddit Cmds", value:"**flet reddit,{subreddit}** - (Displays random post from subreddit (remove {}))"},
-                {name:"Song Cmds", value:"**Play: flet whip,{songname}** - (Caravan, Overture, Whiplash, Upswinging) \n **Skip** - **flet skip** \n **Volume** - **flet volume,{number}** \n"},
-                {name:"Band Practice", value:"**Band Practice: flet bandpractice** - (Band practice in Shaffer Conservatory) \n"}
-
+                {name:"Prefix", value:"**.f**"},
+                {name: "Insult Commands", value:"**sup terence fletcher / sup fletcher** - (Insults you) \n **@Fletcher Bot** - (Reacts with middle finger emoji or insults you) \n "},
+                {name:"Reddit Commands", value:"**.f reddit,{subreddit_without_r/}** - (Displays random post from subreddit)"},
+                {name:"Song Commands", value:"**Play: .f practice,{whiplash_song}** - (Caravan, Overture, Whiplash, Upswinging) \n **Skip** - **.f skip** \n **Stop** - **.f stop** \n **Volume** - **.f volume,{number}** \n"},
                 
             )
-       
-            .setImage('https://cdn.discordapp.com/app-icons/903238930089009212/32085bcc52b077db5b3117df7882f812.png?size=256')
-        
-            .setFooter('Fletcher Bot', 'https://cdn.discordapp.com/app-icons/903238930089009212/32085bcc52b077db5b3117df7882f812.png?size=256');
+    
             msg.channel.send({ embeds: [exampleEmbed] });
                 }
             
@@ -377,14 +412,22 @@ client.on('message',async (msg)=>{
 
     //WITHOUT PREFIX
 
-    else if(msg.content === "<@903238930089009212>" ){
+    else if(msg.mentions.has(client.user)){
         let number = Math.random()<0.5?0:1
-
         if(number===0){
-            msg.reply("yer a f***ing retard pinging me ain't ye")
+            setTimeout(()=>{
+            let adindex = Math.floor(Math.random() * (adjectives.length-1) + 1)
+            let nounindex = Math.floor(Math.random() * (nouns.length-1) + 1)
+
+            msg.reply(`Stop pinging me you ${adjectives[adindex]} ${nouns[nounindex]}`)
+          
+            }, 2000)
+         
         }
+        
         else{
-            msg.react("🖕")
+            setTimeout(()=>{  msg.react("🖕")}, 2000)
+          
         }
         
 
@@ -393,7 +436,6 @@ client.on('message',async (msg)=>{
     else if(msg.content.toLowerCase().includes("sup fletcher") || msg.content.toLowerCase().includes("sup terence fletcher")){
         
        setTimeout(()=>{
-        console.log("Asdafds")
         let option  = Math.random()<0.5?0:1
 
 
@@ -401,11 +443,9 @@ client.on('message',async (msg)=>{
             let number = Math.random()<0.5?0:1
           
             if(number===1){
-                console.log(`${msg.author.username} ${fletcher_insults[number]}`)
                 msg.channel.send(`${msg.author.username} ${fletcher_insults[number]}`)
             }
             else{
-                console.log(`${fletcher_insults[number]}`)
               msg.reply(fletcher_insults[number])
             }
         }
@@ -413,9 +453,8 @@ client.on('message',async (msg)=>{
         else if(option===0){
             
             let adindex = Math.floor(Math.random() * (adjectives.length-1) + 1)
-            let nounindex =  Math.floor(Math.random() * (nouns.length-1) + 1)
-        
-            console.log(`You ${adjectives[adindex]} ${nouns[nounindex]}`)
+            let nounindex = Math.floor(Math.random() * (nouns.length-1) + 1)
+
             msg.reply(`You ${adjectives[adindex]} ${nouns[nounindex]}`)
         }
        }, 2000)
@@ -425,36 +464,20 @@ client.on('message',async (msg)=>{
 
 
     else if(msg.content.toLowerCase()==="twtfdyss"){
-        setTimeout(()=>{ msg.channel.send("THEN WHY THE F*** DIDN'T YE SAY SO!")}, 2000)
-     
-       
+        setTimeout(()=>{ msg.channel.send("THEN WHY THE F*** DIDN'T YOU SAY SO!")}, 2000)
+  
     }
 
     else if(msg.content.toLowerCase() === "ans"){
         msg.channel.send("ANSWEEEEERRR!")
     }
-
-
-    else if(msg.content.toLowerCase() === "fletcher"){
-        if(msg.content.toUpperCase()==="FLETCHER"){
-            msg.reply("YE WHAT THE F*** DO YOU WANT?!")
-        }
-
-        else{
-            msg.reply("ye, what do you want? Don't waste my time for no reason.")
-        }
-    }
-
-    else if(msg.content.toLowerCase()==="sup dawg"){
-       process.exit(1)
-    }
-
-    else{
-        return;
-    }
-
-
 })
+
+client.on('guildCreate', (g) => {
+    const channel = g.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(g.me).has('SEND_MESSAGES'))
+    channel.send(`Wassup cocksuckers! I just joined ${g.name}. Now, listen to me very carefully. My prefix is ".f". Type ".f help" to know more. And if I EVER find you pinging me, I swear to fucking god, I will stop being so polite.`)
+})
+
 
 client.login(process.env.BOT_TOKEN)
 
